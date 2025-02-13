@@ -1,0 +1,42 @@
+{
+	"schemaVersion": 1,
+	"id": "droingomaze",
+	"version": "${version}",
+	"name": "Droingo Maze",
+	"description": "This is a Mod developed for Droingos MazeRunner Series!",
+	"authors": [
+		"Droingo"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "MIT",
+	"icon": "assets/droingomaze/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"net.droingo.droingomaze.DroingoMaze"
+		],
+		"client": [
+			"net.droingo.droingomaze.DroingoMazeClient"
+		],
+
+
+		"fabric-datagen": [
+			"net.droingo.droingomaze.DroingoMazeDataGenerator"
+		]
+	},
+	"mixins": [
+		"droingomaze.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.16.10",
+		"minecraft": "~1.20.1",
+		"java": ">=17",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
