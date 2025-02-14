@@ -1,6 +1,8 @@
 package net.droingo.droingomaze.entity.custom;
 
 import net.minecraft.block.Blocks;
+import net.minecraft.entity.AnimationState;
+import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.WanderAroundGoal;
@@ -22,12 +24,40 @@ public class GrieverEntity extends HostileEntity {
     private int angerLevel = 0;
     private int stillnessTimer = 0; // To track how long the player is still and sneaking
 
+    public final AnimationState idleAnimationState = new AnimationState();
+    private int idleAnimationTimeout = 0;
+
     private PlayerEntity targetPlayer = null;
 
     public GrieverEntity(EntityType<? extends HostileEntity> entityType, World world) {
         super(entityType, world);
         this.experiencePoints = 20;
     }
+
+    private void setupAnimationStates() {
+        if (this.idleAnimationTimeout <= 0) {
+            this.idleAnimationTimeout = this.random.nextInt(40) + 80;
+            this.idleAnimationState.start(this.age);
+        } else {
+            --this.idleAnimationTimeout;
+        }
+    }
+
+    @Override
+    protected void updateLimbs(float posDelta) {
+        float f = this.getPose() == EntityPose.STANDING ? Math.min(posDelta * 6.0f, 1.0f) : 0.0f;
+        this.limbAnimator.updateLimbs(f, 0.2f);
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if(this.getWorld().isClient()) {
+            setupAnimationStates();
+        }
+    }
+
+
 
     public static DefaultAttributeContainer.Builder createGrieverAttributes() {
         return HostileEntity.createHostileAttributes()
