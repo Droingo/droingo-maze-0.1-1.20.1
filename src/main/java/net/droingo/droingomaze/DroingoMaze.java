@@ -1,7 +1,10 @@
 package net.droingo.droingomaze;
 
+import net.droingo.droingomaze.entity.ModEntities;
+import net.droingo.droingomaze.entity.custom.GrieverEntity;
 import net.fabricmc.api.ModInitializer;
 
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,5 +16,9 @@ public class DroingoMaze implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		LOGGER.info("Hello Fabric world!");
+
+		ModEntities.registerModEntities();
+
+		FabricDefaultAttributeRegistry.register(ModEntities.GRIEVER, GrieverEntity.createGrieverAttributes());
 	}
 }
