@@ -31,14 +31,27 @@ public class GrieverEntity extends HostileEntity {
     public final AnimationState idleAnimationState = new AnimationState();
     public final AnimationState attackAnimationState = new AnimationState();
     private int idleAnimationTimeout = 0;
-    public int attackAnimationTimeout = 0;
-    public int attackAnimationTimer = 0;
+    private int attackAnimationTimeout = 0;
 
     private PlayerEntity targetPlayer = null;
 
     public GrieverEntity(EntityType<? extends HostileEntity> entityType, World world) {
         super(entityType, world);
         this.experiencePoints = 20;
+    }
+
+    @Override
+    protected void initDataTracker() {
+        super.initDataTracker();
+        this.dataTracker.startTracking(ATTACKING, false);
+    }
+
+    public boolean isAttacking() {
+        return this.dataTracker.get(ATTACKING);
+    }
+
+    public void setAttacking(boolean attacking) {
+        this.dataTracker.set(ATTACKING, attacking);
     }
 
     private void setupAnimationStates() {
@@ -49,15 +62,19 @@ public class GrieverEntity extends HostileEntity {
             --this.idleAnimationTimeout;
         }
 
-        if (this.isAttacking() && attackAnimationTimeout <= 0) {
-            attackAnimationTimeout = 40;
-            attackAnimationState.start(this.age);
-        } else {
-            --this.attackAnimationTimeout;
-        }
+        if (this.getWorld().isClient()) { // Ensure animations only run on client
+            if (this.isAttacking()) {
+                if (attackAnimationTimeout <= 0) {
+                    attackAnimationTimeout = 40; // Adjust to match animation duration
+                    attackAnimationState.start(this.age);
+                }
+            }
 
-        if (!this.isAttacking()) {
-            attackAnimationState.stop();
+            if (attackAnimationTimeout > 0) {
+                --this.attackAnimationTimeout;
+            } else {
+                attackAnimationState.stop();
+            }
         }
     }
 
@@ -92,7 +109,6 @@ public class GrieverEntity extends HostileEntity {
     private class AttackGoal extends Goal {
         private int memoryTimer = 100;
         private int attackCooldown = 20;
-        private int stillnessTimer = 0; // To track how long the player is still
 
         @Override
         public boolean canStart() {
@@ -120,10 +136,10 @@ public class GrieverEntity extends HostileEntity {
         @Override
         public void start() {
             if (targetPlayer != null) {
-                playSound(SoundEvents.ENTITY_WARDEN_AGITATED, 1.0F, 1.0F);
+                playSound(SoundEvents.ENTITY_ELDER_GUARDIAN_CURSE, 0.4F, 1.0F);
+                playSound(SoundEvents.ENTITY_WARDEN_LISTENING_ANGRY, 1F, 1F);
             }
         }
-
 
         @Override
         public void tick() {
@@ -168,22 +184,14 @@ public class GrieverEntity extends HostileEntity {
 
             // **Attack if close enough**
             if (GrieverEntity.this.distanceTo(targetPlayer) < 2.5 && attackCooldown <= 0) {
-                attackAnimationState.start(GrieverEntity.this.age);
+                setAttacking(true);
+                attackAnimationTimeout = 40; // Ensure animation plays full duration
                 targetPlayer.damage(getDamageSources().mobAttack(GrieverEntity.this), 12.0F);
                 angerLevel = Math.max(angerLevel - 1, 0);
                 attackCooldown = 20;
-                setAttacking(true);
             } else {
-                setAttacking(false);
+                setAttacking(false); // ✅ Stop attacking if target is out of reach
             }
-
-            if (attackAnimationTimer > 0) {
-                attackAnimationTimer--;
-            } else {
-                setAttacking(false);
-            }
-
-
 
             if (attackCooldown > 0) {
                 attackCooldown--;
@@ -195,10 +203,13 @@ public class GrieverEntity extends HostileEntity {
             angerLevel = 0;
             memoryTimer = 0;
             stillnessTimer = 0;
-            attackAnimationState.stop(); // **Stops attack animation when target is lost**
-            setAttacking(false);
+            attackAnimationState.stop(); // ✅ Stops animation properly
+            setAttacking(false); // ✅ Ensures animation stops when target is lost
+
+            playSound(SoundEvents.ENTITY_WARDEN_SNIFF, 1f, 1f);
         }
     }
+
 
     @Override
     protected @Nullable SoundEvent getAmbientSound() {
