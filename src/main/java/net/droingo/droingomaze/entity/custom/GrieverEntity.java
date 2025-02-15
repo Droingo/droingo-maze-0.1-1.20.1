@@ -32,6 +32,7 @@ public class GrieverEntity extends HostileEntity {
     public final AnimationState attackAnimationState = new AnimationState();
     private int idleAnimationTimeout = 0;
     public int attackAnimationTimeout = 0;
+    public int attackAnimationTimer = 0;
 
     private PlayerEntity targetPlayer = null;
 
@@ -175,6 +176,14 @@ public class GrieverEntity extends HostileEntity {
             } else {
                 setAttacking(false);
             }
+
+            if (attackAnimationTimer > 0) {
+                attackAnimationTimer--;
+            } else {
+                setAttacking(false);
+            }
+
+
 
             if (attackCooldown > 0) {
                 attackCooldown--;
