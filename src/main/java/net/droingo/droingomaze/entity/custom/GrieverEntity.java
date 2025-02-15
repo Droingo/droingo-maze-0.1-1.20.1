@@ -103,7 +103,7 @@ public class GrieverEntity extends HostileEntity {
                 players.sort((p1, p2) -> Double.compare(GrieverEntity.this.squaredDistanceTo(p1), GrieverEntity.this.squaredDistanceTo(p2)));
                 targetPlayer = players.get(0);
                 if (targetPlayer != null) {
-                    angerLevel = Math.min(angerLevel + 1, 5); // Increases anger level
+                    angerLevel = Math.min(angerLevel + 1, 5);
                     memoryTimer = 100;
                     return true;
                 }
@@ -115,6 +115,14 @@ public class GrieverEntity extends HostileEntity {
         public boolean shouldContinue() {
             return targetPlayer != null && memoryTimer > 0 && !targetPlayer.isCreative() && !targetPlayer.isSpectator();
         }
+
+        @Override
+        public void start() {
+            if (targetPlayer != null) {
+                playSound(SoundEvents.ENTITY_WARDEN_AGITATED, 1.0F, 1.0F);
+            }
+        }
+
 
         @Override
         public void tick() {
@@ -141,13 +149,13 @@ public class GrieverEntity extends HostileEntity {
                     return;
                 }
             } else {
-                stillnessTimer = 0; // Reset timer if player moves
+                stillnessTimer = 0;
             }
 
             // **Lose Griever if standing still on moss block for 1 second**
             BlockPos playerPos = targetPlayer.getBlockPos().down();
             if (GrieverEntity.this.getWorld().getBlockState(playerPos).getBlock() == Blocks.MOSS_BLOCK) {
-                if (stillnessTimer >= 20) { // 1 second
+                if (stillnessTimer >= 20) {
                     resetTarget();
                     return;
                 }
@@ -161,7 +169,7 @@ public class GrieverEntity extends HostileEntity {
             if (GrieverEntity.this.distanceTo(targetPlayer) < 2.5 && attackCooldown <= 0) {
                 attackAnimationState.start(GrieverEntity.this.age);
                 targetPlayer.damage(getDamageSources().mobAttack(GrieverEntity.this), 12.0F);
-                angerLevel = Math.max(angerLevel - 1, 0); // Decrease anger level on attack
+                angerLevel = Math.max(angerLevel - 1, 0);
                 attackCooldown = 20;
                 setAttacking(true);
             } else {
@@ -178,8 +186,23 @@ public class GrieverEntity extends HostileEntity {
             angerLevel = 0;
             memoryTimer = 0;
             stillnessTimer = 0;
+            attackAnimationState.stop(); // **Stops attack animation when target is lost**
+            setAttacking(false);
         }
     }
 
+    @Override
+    protected @Nullable SoundEvent getAmbientSound() {
+        return SoundEvents.ENTITY_SPIDER_AMBIENT;
+    }
 
+    @Override
+    protected SoundEvent getHurtSound(DamageSource source) {
+        return SoundEvents.ENTITY_SPIDER_HURT;
+    }
+
+    @Override
+    protected SoundEvent getDeathSound() {
+        return SoundEvents.ENTITY_SPIDER_DEATH;
+    }
 }
