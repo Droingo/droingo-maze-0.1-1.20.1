@@ -222,6 +222,7 @@ public class GrieverModel<T extends GrieverEntity> extends SinglePartEntityModel
 
 		this.animateMovement(ModAnimations.WALKING, limbSwing, limbSwingAmount, 2f, 2.5f);
 		this.updateAnimation(entity.idleAnimationState, ModAnimations.IDLE, ageInTicks, 1f);
+		this.updateAnimation(entity.attackAnimationState, ModAnimations.ATTACK, ageInTicks, 1f);
 
 
 	}

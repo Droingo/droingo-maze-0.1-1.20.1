@@ -14,7 +14,7 @@ public class ModEntities {
     public static final EntityType<GrieverEntity> GRIEVER  = Registry.register(Registries.ENTITY_TYPE,
             new Identifier(DroingoMaze.MOD_ID, "griever"),
             FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, GrieverEntity::new)
-                    .dimensions(EntityDimensions.fixed(1.5f, 1.5f))
+                    .dimensions(EntityDimensions.fixed(1.5f, 2.5f))
                     .trackRangeBlocks(64)
                     .build()
     );
